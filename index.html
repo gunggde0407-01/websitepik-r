@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survei Peran Ayah</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a73e8 0%, #6c8ef5 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #1a73e8;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-logo {
+            width: 200px;
+            height: 200px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        .loading-logo img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background-color: white;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: none;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #1a73e8 0%, #6c8ef5 100%);
+            color: white;
+            position: relative;
+        }
+
+        .header-logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-logo img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        header h1 {
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        header p {
+            opacity: 0.9;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e0e0e0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 50%;
+            background: linear-gradient(90deg, #1a73e8 0%, #6c8ef5 100%);
+            transition: width 0.5s ease;
+        }
+
+        /* Form Styles */
+        .form-section {
+            padding: 30px;
+            display: none;
+        }
+
+        .form-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-section h2 {
+            color: #1a73e8;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #1a73e8;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+
+        .error-message {
+            color: #d93025;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Question Styles */
+        .question {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question:last-child {
+            border-bottom: none;
+        }
+
+        .question-text {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #444;
+            font-size: 16px;
+        }
+
+        .options {
+            display: flex;
+            gap: 15px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .option input {
+            display: none;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f5f7fa;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .option input:checked + .option-label {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        .option-label:hover {
+            background-color: #e3eaf3;
+        }
+
+        .option input:checked + .option-label:hover {
+            background-color: #0d5bb9;
+        }
+
+        /* Button */
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .prev-btn {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        .prev-btn:hover {
+            background-color: #ddd;
+        }
+
+        .next-btn, .submit-btn {
+            background-color: #1a73e8;
+            color: white;
+        }
+
+        .next-btn:hover, .submit-btn:hover {
+            background-color: #0d5bb9;
+        }
+
+        /* Result Popup */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: popup-appear 0.5s ease;
+            position: relative;
+        }
+
+        .popup-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background-color: #f0f7ff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .popup-logo img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+        @keyframes popup-appear {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .popup h2 {
+            color: #1a73e8;
+            margin-bottom: 15px;
+        }
+
+        .popup p {
+            margin-bottom: 20px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .popup-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .wa-btn {
+            background-color: #25D366;
+            color: white;
+        }
+
+        .wa-btn:hover {
+            background-color: #128C7E;
+        }
+
+        .close-btn {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        .close-btn:hover {
+            background-color: #ddd;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+            background-color: #f9f9f9;
+        }
+
+        /* Result Icon */
+        .result-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        /* Logo Upload Section */
+        .logo-upload {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .logo-upload p {
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .upload-btn {
+            background-color: #1a73e8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #0d5bb9;
+        }
+
+        #logo-file {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-logo">
+            <img src="logopikr.png" alt="Logo Survei Peran Ayah" id="loading-logo">
+        </div>
+        <div class="loading-text">Memuat Survei Peran Ayah</div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loading-progress"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container" id="main-content">
+        <header>
+            <div class="header-logo">
+                <img src="logopikr.png" alt="Logo Survei Peran Ayah" id="header-logo">
+            </div>
+            <h1>Survei Peran Ayah</h1>
+            <p>Isi data diri dan jawab pertanyaan berikut untuk mengevaluasi peran Anda sebagai ayah</p>
+        </header>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <!-- Logo Upload Section -->
+        <div class="logo-upload">
+            <p>Jika logo tidak muncul, Anda dapat mengunggah logo "logopikr.png"</p>
+            <input type="file" id="logo-file" accept="image/png, image/jpeg, image/jpg">
+            <button class="upload-btn" onclick="document.getElementById('logo-file').click()">Unggah Logo</button>
+        </div>
+
+        <form id="survey-form">
+            <!-- Data Identitas Section -->
+            <section class="form-section active" id="section-identitas">
+                <h2>Data Identitas</h2>
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap *</label>
+                    <input type="text" id="nama" name="nama" required>
+                    <div class="error-message" id="nama-error">Nama lengkap harus diisi</div>
+                </div>
+                <div class="form-group">
+                    <label for="telepon">Nomor Telepon *</label>
+                    <input type="tel" id="telepon" name="telepon" pattern="08[0-9]{8,11}" required>
+                    <div class="error-message" id="telepon-error">Nomor telepon harus diisi dan dimulai dengan 08</div>
+                </div>
+                <div class="form-group">
+                    <label for="alamat">Alamat *</label>
+                    <input type="text" id="alamat" name="alamat" required>
+                    <div class="error-message" id="alamat-error">Alamat harus diisi</div>
+                </div>
+                <div class="form-group">
+                    <label for="domisili">Domisili *</label>
+                    <input type="text" id="domisili" name="domisili" required>
+                    <div class="error-message" id="domisili-error">Domisili harus diisi</div>
+                </div>
+                <div class="form-group">
+                    <label for="nik">NIK *</label>
+                    <input type="text" id="nik" name="nik" required>
+                    <div class="error-message" id="nik-error">NIK harus diisi</div>
+                </div>
+                
+                <div class="button-group">
+                    <div></div> <!-- Empty div for spacing -->
+                    <button type="button" class="nav-btn next-btn" id="next-to-survei">Lanjut ke Survei</button>
+                </div>
+            </section>
+
+            <!-- Pertanyaan Section -->
+            <section class="form-section" id="section-survei">
+                <h2>Pertanyaan Survei</h2>
+                
+                <div class="question">
+                    <div class="question-text">1️⃣ Apakah dalam 1 Minggu terakhir ayah terlibat langsung dalam kegiatan beribadah bersama anak?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q1-ya" name="q1" value="Ya" required>
+                            <label for="q1-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q1-tidak" name="q1" value="Tidak" required>
+                            <label for="q1-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q1-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">2️⃣ Apakah dalam 1 Minggu terakhir ayah mendampingi anak bermain bersama?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q2-ya" name="q2" value="Ya" required>
+                            <label for="q2-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q2-tidak" name="q2" value="Tidak" required>
+                            <label for="q2-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q2-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">3️⃣ Apakah dalam 1 Minggu terakhir ayah makan bersama anak?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q3-ya" name="q3" value="Ya" required>
+                            <label for="q3-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3-tidak" name="q3" value="Tidak" required>
+                            <label for="q3-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q3-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">4️⃣ Apakah dalam 1 Minggu terakhir ayah rekreasi bersama anak (jalan-jalan, menonton, dll)?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q4-ya" name="q4" value="Ya" required>
+                            <label for="q4-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q4-tidak" name="q4" value="Tidak" required>
+                            <label for="q4-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q4-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">5️⃣ Apakah dalam 1 Minggu terakhir ayah melibatkan anak dalam kegiatan rumah tangga (membersihkan rumah, mencuci piring, dll)?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q5-ya" name="q5" value="Ya" required>
+                            <label for="q5-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q5-tidak" name="q5" value="Tidak" required>
+                            <label for="q5-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q5-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">6️⃣ Apakah dalam 1 Minggu terakhir ayah mendampingi anak belajar?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q6-ya" name="q6" value="Ya" required>
+                            <label for="q6-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q6-tidak" name="q6" value="Tidak" required>
+                            <label for="q6-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q6-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">7️⃣ Apakah dalam 2 hari terakhir ayah meluangkan waktu khusus untuk berdialog dengan anak (ngobrol, mendengarkan cerita, atau curhat)?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q7-ya" name="q7" value="Ya" required>
+                            <label for="q7-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q7-tidak" name="q7" value="Tidak" required>
+                            <label for="q7-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q7-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">8️⃣ Apakah dalam 1 minggu terakhir ayah melakukan komunikasi aktif dengan anak (menanyakan perasaan, kegiatan, atau pendapatnya)?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q8-ya" name="q8" value="Ya" required>
+                            <label for="q8-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q8-tidak" name="q8" value="Tidak" required>
+                            <label for="q8-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q8-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">9️⃣ Apakah ayah mengetahui pergaulan anaknya (siapa teman-temannya, kegiatan luar sekolah, dsb)?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q9-ya" name="q9" value="Ya" required>
+                            <label for="q9-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q9-tidak" name="q9" value="Tidak" required>
+                            <label for="q9-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q9-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="question">
+                    <div class="question-text">🔟 Apakah dalam 1 Minggu terakhir ayah mengantar atau menjemput anak ke sekolah?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q10-ya" name="q10" value="Ya" required>
+                            <label for="q10-ya" class="option-label">Ya</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q10-tidak" name="q10" value="Tidak" required>
+                            <label for="q10-tidak" class="option-label">Tidak</label>
+                        </div>
+                    </div>
+                    <div class="error-message" id="q10-error">Pertanyaan ini harus dijawab</div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="nav-btn prev-btn" id="prev-to-identitas">Kembali ke Identitas</button>
+                    <button type="submit" class="nav-btn submit-btn">Kirim Survei</button>
+                </div>
+            </section>
+        </form>
+
+        <footer>
+            <p>&copy; 2023 Survei Peran Ayah. Hak Cipta Dilindungi.</p>
+        </footer>
+    </div>
+
+    <!-- Result Popup -->
+    <div class="popup" id="result-popup">
+        <div class="popup-content">
+            <div class="popup-logo">
+                <img src="logopikr.png" alt="Logo Survei Peran Ayah" id="popup-logo">
+            </div>
+            <div class="result-icon" id="result-icon">📊</div>
+            <h2 id="result-title">Hasil Survei</h2>
+            <p id="result-message"></p>
+            <div class="popup-buttons">
+                <button class="popup-btn wa-btn" id="wa-button">Gabung Grup WA</button>
+                <button class="popup-btn close-btn" id="close-popup">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate loading process
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const loadingProgress = document.getElementById('loading-progress');
+            const mainContent = document.getElementById('main-content');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                loadingProgress.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            mainContent.style.display = 'block';
+                        }, 500);
+                    }, 500);
+                }
+            }, 100);
+            
+            // Check if logo exists and show upload section if not
+            checkLogoExists();
+        });
+
+        // Function to check if logo exists
+        function checkLogoExists() {
+            const logo = new Image();
+            logo.src = 'logopikr.png';
+            logo.onload = function() {
+                console.log('Logo berhasil dimuat');
+                document.querySelector('.logo-upload').style.display = 'none';
+            }
+            logo.onerror = function() {
+                console.log('Logo tidak ditemukan, menampilkan opsi unggah');
+                document.querySelector('.logo-upload').style.display = 'block';
+            }
+        }
+
+        // Handle logo upload
+        document.getElementById('logo-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const logoData = e.target.result;
+                    
+                    // Update all logo images
+                    document.getElementById('loading-logo').src = logoData;
+                    document.getElementById('header-logo').src = logoData;
+                    document.getElementById('popup-logo').src = logoData;
+                    
+                    // Hide upload section
+                    document.querySelector('.logo-upload').style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form navigation
+        const sectionIdentitas = document.getElementById('section-identitas');
+        const sectionSurvei = document.getElementById('section-survei');
+        const progressBar = document.getElementById('progress-bar');
+        const nextToSurveiBtn = document.getElementById('next-to-survei');
+        const prevToIdentitasBtn = document.getElementById('prev-to-identitas');
+        
+        nextToSurveiBtn.addEventListener('click', function() {
+            if (validateIdentitas()) {
+                sectionIdentitas.classList.remove('active');
+                sectionSurvei.classList.add('active');
+                progressBar.style.width = '100%';
+            }
+        });
+        
+        prevToIdentitasBtn.addEventListener('click', function() {
+            sectionSurvei.classList.remove('active');
+            sectionIdentitas.classList.add('active');
+            progressBar.style.width = '50%';
+        });
+
+        // Validate identitas form
+        function validateIdentitas() {
+            let isValid = true;
+            
+            // Nama validation
+            const nama = document.getElementById('nama');
+            const namaError = document.getElementById('nama-error');
+            if (!nama.value.trim()) {
+                namaError.style.display = 'block';
+                isValid = false;
+            } else {
+                namaError.style.display = 'none';
+            }
+            
+            // Telepon validation
+            const telepon = document.getElementById('telepon');
+            const teleponError = document.getElementById('telepon-error');
+            const teleponPattern = /^08[0-9]{8,11}$/;
+            if (!teleponPattern.test(telepon.value)) {
+                teleponError.style.display = 'block';
+                isValid = false;
+            } else {
+                teleponError.style.display = 'none';
+            }
+            
+            // Alamat validation
+            const alamat = document.getElementById('alamat');
+            const alamatError = document.getElementById('alamat-error');
+            if (!alamat.value.trim()) {
+                alamatError.style.display = 'block';
+                isValid = false;
+            } else {
+                alamatError.style.display = 'none';
+            }
+            
+            // Domisili validation
+            const domisili = document.getElementById('domisili');
+            const domisiliError = document.getElementById('domisili-error');
+            if (!domisili.value.trim()) {
+                domisiliError.style.display = 'block';
+                isValid = false;
+            } else {
+                domisiliError.style.display = 'none';
+            }
+            
+            // NIK validation
+            const nik = document.getElementById('nik');
+            const nikError = document.getElementById('nik-error');
+            if (!nik.value.trim()) {
+                nikError.style.display = 'block';
+                isValid = false;
+            } else {
+                nikError.style.display = 'none';
+            }
+            
+            return isValid;
+        }
+
+        // Only allow numbers in telepon field
+        document.getElementById('telepon').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Function untuk mengirim data ke Google Apps Script
+        async function sendToGoogleAppsScript(data) {
+            // ✅ URL WEB APP YANG BARU
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbxv77vkBHCbW2AKNjAUWc6uGAtJCHUxnY-UXPeQS-jxjD7Jw9fiQYUFb1xSZpKqW8H8/exec';
+            
+            try {
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                return result;
+                
+            } catch (error) {
+                console.error('Error mengirim data:', error);
+                return { 
+                    success: false, 
+                    message: 'Gagal mengirim data: ' + error.message 
+                };
+            }
+        }
+
+        // Form submission handler - KODE YANG SUDAH DIPERBAIKI
+        document.getElementById('survey-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Validasi pertanyaan survei
+            let semuaTerjawab = true;
+            for (let i = 1; i <= 10; i++) {
+                const pertanyaan = document.querySelector(`input[name="q${i}"]:checked`);
+                const elemenError = document.getElementById(`q${i}-error`);
+                
+                if (!pertanyaan) {
+                    elemenError.style.display = 'block';
+                    semuaTerjawab = false;
+                } else {
+                    elemenError.style.display = 'none';
+                }
+            }
+            
+            if (!semuaTerjawab) {
+                const errorPertama = document.querySelector('.error-message[style="display: block;"]');
+                if (errorPertama) {
+                    errorPertama.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            // Kumpulkan data form
+            const formData = new FormData(this);
+            const data = {};
+            for (const [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            // Tampilkan status loading
+            const tombolSubmit = document.querySelector('.submit-btn');
+            const teksAsli = tombolSubmit.textContent;
+            tombolSubmit.textContent = 'Mengirim...';
+            tombolSubmit.disabled = true;
+            
+            // Kirim data ke Google Apps Script
+            const result = await sendToGoogleAppsScript(data);
+            
+            // ✅ PERBAIKAN: Gunakan result.success (bukan result.berhasil)
+            if (result.success) {
+                // Tampilkan hasil
+                let judulHasil, pesanHasil, ikonHasil;
+                if (result.score >= 7) {
+                    judulHasil = "Selamat! Anda Sudah Optimal";
+                    pesanHasil = `Skor Anda: ${result.score}/10. Hasil survei menunjukkan bahwa Anda telah berperan optimal sebagai seorang ayah. Terus pertahankan dan tingkatkan kualitas waktu bersama anak!`;
+                    ikonHasil = "🎉";
+                } else {
+                    judulHasil = "Perlu Peningkatan Peran";
+                    pesanHasil = `Skor Anda: ${result.score}/10. Hasil survei menunjukkan bahwa peran Anda sebagai ayah masih perlu ditingkatkan. Coba luangkan lebih banyak waktu berkualitas dengan anak Anda.`;
+                    ikonHasil = "📈";
+                }
+                
+                // Tampilkan popup hasil
+                document.getElementById('result-title').textContent = judulHasil;
+                document.getElementById('result-message').textContent = pesanHasil;
+                document.getElementById('result-icon').textContent = ikonHasil;
+                document.getElementById('result-popup').style.display = 'flex';
+                
+                // Reset form
+                this.reset();
+                sectionSurvei.classList.remove('active');
+                sectionIdentitas.classList.add('active');
+                progressBar.style.width = '50%';
+                
+            } else {
+                // Tampilkan pesan error
+                if (result.message.includes('sudah terdaftar')) {
+                    alert('❌ ' + result.message);
+                } else {
+                    alert('❌ Terjadi kesalahan: ' + result.message);
+                }
+            }
+            
+            // Reset status tombol
+            tombolSubmit.textContent = teksAsli;
+            tombolSubmit.disabled = false;
+        });
+
+        // Close popup
+        document.getElementById('close-popup').addEventListener('click', function() {
+            document.getElementById('result-popup').style.display = 'none';
+        });
+
+        // WhatsApp button
+        document.getElementById('wa-button').addEventListener('click', function() {
+            // Ganti dengan link WhatsApp group kamu
+            window.open('https://wa.me/yourgroup', '_blank');
+        });
+    </script>
+</body>
+</html>
